@@ -2,6 +2,7 @@ package com.kaju.fingerprintlockcontrol;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         checkScanner();
     }
+
     private void checkScanner(){
         TextView statusTxt = (TextView)findViewById(R.id.currStatusTxt);
         Button addBtn = (Button)findViewById(R.id.addBtn);
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(context,txt,duration);
         toast.show();
     }
-    private void popupAddRemoveWindowTrigger(String title, String msg, final String ctxt){
+    private void popupAddRemoveWindowTrigger(String title, String msg, final String ctxt, final boolean removeCmd){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(msg);
@@ -97,9 +99,10 @@ public class MainActivity extends AppCompatActivity {
                 if (id <= 0 || id > 20) toastPopUp("Please enter valid id (between 1 and 20)!");
                 else closeDialog = true;
                 if(closeDialog) {
-                    id = 0;
                     dialog.dismiss();
-                    toastPopUp(ctxt);
+                    if(removeCmd) removeConfirmationPopup();
+                    id = 0;
+                    if(!removeCmd) toastPopUp(ctxt);
                 }
             }
         }
@@ -126,17 +129,60 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    public void removeConfirmationPopup(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Remove entry");
+        builder.setMessage("Do you really want to remove entry with ID of " + id);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.dismiss();
+                toastPopUp("Entry removed.");
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.cancel();
+                toastPopUp("Operation cancelled.");
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void backBtnExitConfirmationPopup(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Exit.");
+        builder.setMessage("Are you sure? Connection with paired lock will be terminated.");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.dismiss();
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.cancel();
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     public void addBtnOnClick(View v){
         //co prawda sprawdzanie, czy isScanner jest 0 czy 1 nie jest tu wymagane, bo już jest funkcja która wyłącza te przyciski, niemniej jednak dla bezpieczeństwa tu go zostawiłem
         if(isScanner) {
-            popupAddRemoveWindowTrigger("Add new fingerprint", "Insert ID of new fingerprint to be added:", "Now follow instructions on lock's screen.");
+            popupAddRemoveWindowTrigger("Add new fingerprint", "Insert ID of new fingerprint to be added:", "Now follow instructions on lock's screen.",false);
         } else {
             toastPopUp("This option is disabled when scanner is unavailable");
         }
     }
     public void removeBtnOnClick(View v){
         if(isScanner) {
-        popupAddRemoveWindowTrigger("Remove fingerprint","Insert ID of fingerprint to be removed:","Fingerprint removed.");
+        popupAddRemoveWindowTrigger("Remove fingerprint","Insert ID of fingerprint to be removed:","", true);
         } else {
             toastPopUp("This option is disabled when scanner is unavailable");
         }
@@ -160,5 +206,8 @@ public class MainActivity extends AppCompatActivity {
     }
     public void remoteClsBtnOnClick(View v){
         toastPopUp("Remote close...");
+    }
+    public void onBackPressed(){
+        backBtnExitConfirmationPopup();
     }
 }
