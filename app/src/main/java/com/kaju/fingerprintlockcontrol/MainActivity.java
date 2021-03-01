@@ -133,12 +133,38 @@ public class MainActivity extends AppCompatActivity {
     public void removeConfirmationPopup(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Remove entry");
-        builder.setMessage("Do you really want to remove entry with ID of " + id);
+        builder.setMessage("Entry with ID of " + id + " will be removed. \nAre you sure?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
             @Override
             public void onClick(DialogInterface dialog, int which){
                 dialog.dismiss();
                 toastPopUp("Entry removed.");
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.cancel();
+                toastPopUp("Operation cancelled.");
+            }
+        });
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public void restartConfirmationPopup(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Remote restart");
+        builder.setMessage("Are you sure you want to restart lock?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which){
+                dialog.dismiss();
+                toastPopUp("Restarting....");
+                TextView statusTxt = (TextView)findViewById(R.id.currStatusTxt);
+                statusTxt.setText("Pending...");
+                statusTxt.setTextColor(Color.BLACK);
+                restartTest.start();
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener(){
@@ -194,12 +220,8 @@ public class MainActivity extends AppCompatActivity {
             toastPopUp("This option is disabled when scanner is unavailable");
         }
     }
-    public void resetBtnOnClick(View v){
-        TextView statusTxt = (TextView)findViewById(R.id.currStatusTxt);
-        toastPopUp("Restarting...");
-        statusTxt.setText("Pending...");
-        statusTxt.setTextColor(Color.BLACK);
-        restartTest.start();
+    public void restartBtnOnClick(View v){
+        restartConfirmationPopup();
     }
     public void remoteOpnBtnOnClick(View v){
         toastPopUp("Remote open...");
